@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -18,6 +19,7 @@ import { Modal } from "@/components/ui/Modal";
 import { useStoreModel } from "@/hooks/use-store-modal";
 
 export const StoreModal = () => {
+  const [loading, setLoading] = useState(false);
   const profileFormSchema = z.object({
     name: z.string().min(1, {
       message: "name must be at least 1 characters.",
@@ -35,8 +37,18 @@ export const StoreModal = () => {
     mode: "onChange",
   });
 
-  const onSubmit = (data: ProfileFormValues) => {
-    console.log(data);
+  const onSubmit = async (data: ProfileFormValues) => {
+    try {
+      setLoading(true);
+      console.log(data);
+      const response = await axios.post("/api/stores", data);
+
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const storeModal = useStoreModel();
@@ -72,10 +84,16 @@ export const StoreModal = () => {
                 />
                 <div>
                   <div className="flex justify-end items-center space-x-2 w-full">
-                    <Button variant={"outline"} onClick={storeModal.onClose}>
+                    <Button
+                      disabled={loading}
+                      variant={"outline"}
+                      onClick={storeModal.onClose}
+                    >
                       Cancle
                     </Button>
-                    <Button type="submit">Continue</Button>
+                    <Button disabled={loading} type="submit">
+                      Continue
+                    </Button>
                   </div>
                 </div>
               </form>
